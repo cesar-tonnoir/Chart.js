@@ -168,6 +168,9 @@
 			// String - Template string for single tooltips
 			tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value %>",
 
+			// Boolean - Will force the tooltip top be placed at the top of the canvas
+			tooltipFixed: false,
+
 			// String - Template string for single tooltips
 			multiTooltipTemplate: "<%= value %>",
 
@@ -1102,7 +1105,8 @@
 							cornerRadius: this.options.tooltipCornerRadius,
 							text: template(this.options.tooltipTemplate, Element),
 							chart: this.chart,
-							custom: this.options.customTooltips
+							custom: this.options.customTooltips,
+							tooltipFixed: this.options.tooltipFixed
 						}).draw();
 					}, this);
 				}
@@ -1364,6 +1368,11 @@
 				tooltipRectHeight = this.fontSize + 2*this.yPadding,
 				tooltipHeight = tooltipRectHeight + this.caretHeight + caretPadding;
 
+			if (this.tooltipFixed) {
+				tooltipWidth = this.chart.width;
+				tooltipRectHeight = 2*this.fontSize + 4*this.yPadding;
+			}
+
 			if (this.x + tooltipWidth/2 >this.chart.width){
 				this.xAlign = "left";
 			} else if (this.x - tooltipWidth/2 < 0){
@@ -1385,37 +1394,50 @@
 				this.custom(this);
 			}
 			else{
-				switch(this.yAlign)
-				{
-				case "above":
-					//Draw a caret above the x/y
-					ctx.beginPath();
-					ctx.moveTo(this.x,this.y - caretPadding);
-					ctx.lineTo(this.x + this.caretHeight, this.y - (caretPadding + this.caretHeight));
-					ctx.lineTo(this.x - this.caretHeight, this.y - (caretPadding + this.caretHeight));
-					ctx.closePath();
-					ctx.fill();
-					break;
-				case "below":
-					tooltipY = this.y + caretPadding + this.caretHeight;
-					//Draw a caret below the x/y
-					ctx.beginPath();
-					ctx.moveTo(this.x, this.y + caretPadding);
-					ctx.lineTo(this.x + this.caretHeight, this.y + caretPadding + this.caretHeight);
-					ctx.lineTo(this.x - this.caretHeight, this.y + caretPadding + this.caretHeight);
-					ctx.closePath();
-					ctx.fill();
-					break;
-				}
+				if (this.tooltipFixed) {
+					tooltipX = 0;
+					switch(this.yAlign) {
+						case "above":
+							tooltipY = 0;
+							break;
+						case "below":
+							tooltipY = this.chart.height / 2 - tooltipRectHeight / 2;
+							break;
+					}
+				}	
+				else {			
+					switch(this.yAlign)
+					{
+					case "above":
+						//Draw a caret above the x/y
+						ctx.beginPath();
+						ctx.moveTo(this.x,this.y - caretPadding);
+						ctx.lineTo(this.x + this.caretHeight, this.y - (caretPadding + this.caretHeight));
+						ctx.lineTo(this.x - this.caretHeight, this.y - (caretPadding + this.caretHeight));
+						ctx.closePath();
+						ctx.fill();
+						break;
+					case "below":
+						tooltipY = this.y + caretPadding + this.caretHeight;
+						//Draw a caret below the x/y
+						ctx.beginPath();
+						ctx.moveTo(this.x, this.y + caretPadding);
+						ctx.lineTo(this.x + this.caretHeight, this.y + caretPadding + this.caretHeight);
+						ctx.lineTo(this.x - this.caretHeight, this.y + caretPadding + this.caretHeight);
+						ctx.closePath();
+						ctx.fill();
+						break;
+					}
 
-				switch(this.xAlign)
-				{
-				case "left":
-					tooltipX = this.x - tooltipWidth + (this.cornerRadius + this.caretHeight);
-					break;
-				case "right":
-					tooltipX = this.x - (this.cornerRadius + this.caretHeight);
-					break;
+					switch(this.xAlign)
+					{
+					case "left":
+						tooltipX = this.x - tooltipWidth + (this.cornerRadius + this.caretHeight);
+						break;
+					case "right":
+						tooltipX = this.x - (this.cornerRadius + this.caretHeight);
+						break;
+					}
 				}
 
 				drawRoundedRectangle(ctx,tooltipX,tooltipY,tooltipWidth,tooltipRectHeight,this.cornerRadius);
@@ -1425,7 +1447,13 @@
 				ctx.fillStyle = this.textColor;
 				ctx.textAlign = "center";
 				ctx.textBaseline = "middle";
-				ctx.fillText(this.text, tooltipX + tooltipWidth/2, tooltipY + tooltipRectHeight/2);
+				if (this.tooltipFixed && this.text.split(':').length >= 2) {
+					ctx.fillText(this.text.split(':')[0], tooltipX + tooltipWidth/2, tooltipY + this.yPadding + this.fontSize);
+					ctx.fillText(this.text.split(':')[1], tooltipX + tooltipWidth/2, tooltipY + 2*(this.yPadding + this.fontSize));
+				}
+				else {
+					ctx.fillText(this.text, tooltipX + tooltipWidth/2, tooltipY + tooltipRectHeight/2);
+				}
 			}
 		}
 	});
