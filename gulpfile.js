@@ -42,6 +42,11 @@ gulp.task('build', function(){
 		.pipe(gulp.dest(outputDir))
 		.pipe(uglify({preserveComments:'some'}))
 		.pipe(concat('Chart.min.js'))
+		// Mno Hook: fix bug in uglyfier causing unexpected string error in JS
+		// see: https://github.com/nnnick/Chart.js/issues/1280
+		.pipe(replace(/\.split\("<%"\)\.join\("\s*"\)/, '.split("<%").join("\\t")'))
+		.pipe(replace(/\.split\("\s*"\)\.join\("'\);"\)/, '.split("\\t").join("\');")'))
+		// ---
 		.pipe(gulp.dest(outputDir));
 
 	function FileName(moduleName){

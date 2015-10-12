@@ -38,8 +38,10 @@
 		barDatasetSpacing : 1,
 
 		//String - A legend template
-		legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+		legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"><%if(datasets[i].label){%><%=datasets[i].label%><%}%></span></li><%}%></ul>"
 
+		// Boolean - Wether to show the horizontal axis labels
+		showXLabels: true,
 	};
 
 
@@ -208,7 +210,7 @@
 					);
 					helpers.extend(this, updatedRanges);
 				},
-				xLabels : labels,
+				xLabels : this.options.showXLabels ? labels : [],
 				font : helpers.fontString(this.options.scaleFontSize, this.options.scaleFontStyle, this.options.scaleFontFamily),
 				lineWidth : this.options.scaleLineWidth,
 				lineColor : this.options.scaleLineColor,
@@ -240,6 +242,7 @@
 				this.datasets[datasetIndex].bars.push(new this.BarClass({
 					value : value,
 					label : label,
+					datasetLabel: this.datasets[datasetIndex].label,
 					x: this.scale.calculateBarX(this.datasets.length, datasetIndex, this.scale.valuesCount+1),
 					y: this.scale.endPoint,
 					width : this.scale.calculateBarWidth(this.datasets.length),

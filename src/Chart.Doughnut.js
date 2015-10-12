@@ -32,7 +32,7 @@
 		animateScale : false,
 
 		//String - A legend template
-		legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<segments.length; i++){%><li><span style=\"background-color:<%=segments[i].fillColor%>\"></span><%if(segments[i].label){%><%=segments[i].label%><%}%></li><%}%></ul>"
+		legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<segments.length; i++){%><li><span style=\"background-color:<%=segments[i].fillColor%>\"><%if(segments[i].label){%><%=segments[i].label%><%}%></span></li><%}%></ul>"
 
 	};
 
@@ -91,7 +91,7 @@
 			return segmentsArray;
 		},
 		addData : function(segment, atIndex, silent){
-			var index = atIndex || this.segments.length;
+			var index = atIndex !== undefined ? atIndex : this.segments.length;
 			this.segments.splice(index, 0, new this.SegmentArc({
 				value : segment.value,
 				outerRadius : (this.options.animateScale) ? 0 : this.outerRadius,
@@ -110,8 +110,12 @@
 				this.update();
 			}
 		},
-		calculateCircumference : function(value){
-			return (Math.PI*2)*(Math.abs(value) / this.total);
+		calculateCircumference : function(value) {
+			if ( this.total > 0 ) {
+				return (Math.PI*2)*(value / this.total);
+			} else {
+				return 0;
+			}
 		},
 		calculateTotal : function(data){
 			this.total = 0;
